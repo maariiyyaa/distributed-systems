@@ -1,0 +1,2 @@
+hazelcast==0.1.0
+hazelcast-python-client==5.1
