@@ -1,0 +1,4 @@
+{
+  "bootstraps": "localhost:9092",
+  "topic": "test-topic"
+}
