@@ -1,0 +1,27 @@
+version: "3.9"  # optional since v1.27.0
+services:
+  hazlecast_n1:
+    image: hazelcast/hazelcast:latest
+    environment:
+       HZ_NETWORK_PUBLICADDRESS: hazlecast_n1:5701
+    ports:
+      - "5701:5701"
+  hazlecast_n2:
+    image: hazelcast/hazelcast:latest
+    environment:
+      HZ_NETWORK_PUBLICADDRESS: hazlecast_n2:5701
+    ports:
+      - "5702:5701"
+  hazlecast_n3:
+    image: hazelcast/hazelcast:latest
+    environment:
+      HZ_NETWORK_PUBLICADDRESS: hazlecast_n3:5701
+    ports:
+      - "5703:5701"
+  hazlecast_manage_node:
+    image: hazelcast/management-center:latest
+    environment:
+      MC_DEFAULT_CLUSTER: dev
+      MC_DEFAULT_CLUSTER_MEMBERS: hazlecast_n1:5701,hazlecast_n2:5701,hazlecast_n3:5701
+    ports:
+      - "8080:8080"
