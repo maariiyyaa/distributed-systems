@@ -1,0 +1,23 @@
+---
+version: '3'
+services:
+  master:
+    build: .
+    container_name: master
+    expose:
+      - 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./master:/app
+
+  secondary:
+    build: .
+    environment:
+      master: master
+    depends_on:
+      - master
+    deploy:
+      replicas: 3
+    volumes:
+      - ./secondary:/app
