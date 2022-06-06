@@ -1,3 +1,7 @@
+import logging
+import random
+import time
+
 import requests
 from flask import Flask
 import os
@@ -11,6 +15,9 @@ app = Flask('secondary')
 @app.route('/secondary', methods=['GET', 'POST'])
 def secondary_app():
     if request.method == 'POST':
+        rnd = random.randint(3, 12)
+        app.logger.info(f'Sleep time: {rnd}')
+        time.sleep(rnd)
         try:
             if request.is_json:
                 LOCAL_STORAGE[list(request.json.keys())[0]] = list(request.json.values())[0]
@@ -29,6 +36,7 @@ def secondary_app():
 
 
 if __name__ == '__main__':
+    app.logger.setLevel(logging.INFO)
     if not os.environ.get("master"):
         os.environ["master"] = "localhost"
     requests.request('LINK', f'http://{os.environ.get("master")}:5000/register')

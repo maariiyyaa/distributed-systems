@@ -2,6 +2,7 @@ import time
 import uuid
 import logging
 
+from multiprocessing.dummy import Pool
 import requests
 from flask import Flask
 from flask import request
@@ -11,24 +12,12 @@ SECONDARIES = []
 app = Flask('master')
 
 
-def post_to_secondaries(secondary, mess_id: str, message: str, retry_attempts=0):
-    try:
-        resp = requests.post(f"http://{secondary}/secondary", json={str(mess_id): message}, timeout=500)
-    except requests.exceptions.ConnectionError as e:
-        if retry_attempts >= 1:
-            app.logger.warning(e.strerror)
-            app.logger.warning(f'Retry sending to {secondary}')
-            resp = post_to_secondaries(secondary, mess_id, message, retry_attempts - 1)
-        else:
-            raise e
-    return resp
-
-
 @app.route('/master', methods=['GET', 'POST'])
 def master_app():
     if request.method == 'POST':
         try:
             message = request.data.decode("utf-8")
+            write_concern = int(request.args.get('w', 1))
             mess_id = uuid.uuid4().hex
             LOCAL_STORAGE[str(mess_id)] = message
         except Exception as e:
@@ -36,10 +25,17 @@ def master_app():
         else:
             if not SECONDARIES:
                 return 'No replicas'
-            for i in SECONDARIES:
-                app.logger.info(
-                    f'Delivery status to {i}: {post_to_secondaries(i, mess_id, message, retry_attempts=3).status_code}')
-            return f'Stored to local and replicas {", ".join(SECONDARIES)}'
+            else:
+                app.logger.info('Requests sent')
+                pool = Pool(10)
+                futures = [pool.apply_async(requests.post,
+                                         [f"http://{secondary}/secondary"],
+                                         kwds={'json': {str(mess_id): message}, 'timeout': 500}
+                                         ) for secondary in SECONDARIES]
+
+                while sum([i.get().status_code == 200 for i in futures if hasattr(i, '_success')]) < write_concern - 1:
+                    time.sleep(1)
+                return f'Stored to local and {write_concern - 1} replicas'
 
     elif request.method == 'GET':
         try:
