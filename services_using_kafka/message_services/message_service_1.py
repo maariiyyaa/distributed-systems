@@ -50,5 +50,5 @@ if __name__ == '__main__':
                              bootstrap_servers=kafka_config['bootstraps'],
                              auto_offset_reset=kafka_config['start_from'],
                              )
-    cf.register_service(name="message-service1", host="localhost", port=ports['message1'])
+    cf.register_service(name="message-service", host="localhost", port=ports['message1'], service_id="message1")
     app.run(port=ports['message1'])

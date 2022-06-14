@@ -55,7 +55,7 @@ def register_service(name, host, port, service_id=None):
         print(f"service {name} registered")
 
 
-def get_service_params(service_name):
+def get_service_params(service_name, service_id):
     """
     Gets host and port of registered service
     :param service_name: name of the service
@@ -64,10 +64,9 @@ def get_service_params(service_name):
     try:
         c = Consul()
         response = c.catalog.service(service_name)
-        host = response[1][0]["ServiceAddress"]
-        port = response[1][0]["ServicePort"]
+        service = list(filter(lambda service: service["ServiceID"]==service_id, response[1]))[0]
+        host = service["ServiceAddress"]
+        port = service["ServicePort"]
         return host, port
     except Exception as e:
-        raise e
-
-
+        raise Exception('service is not found')

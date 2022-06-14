@@ -50,6 +50,6 @@ if __name__ == '__main__':
     ports = cf.get_kv("ports")
     client = HazelcastClient()
     queue = client.get_queue(cf.get_kv("hz_queue")["name"]).blocking()
-    cf.register_service(name="message-service2", host="localhost", port=ports['message2'])
+    cf.register_service(name="message-service", host="localhost", port=ports['message2'], service_id="message2")
     app.run(host='localhost', port=ports['message2'])
     client.shutdown()

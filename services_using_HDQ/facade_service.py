@@ -52,12 +52,14 @@ def get_response(service, ):
     :return: GET response data and a service number
     """
     if service == "logging":
-        _choice = choice(['logging-service1', 'logging-service2', 'logging-service3'])
+        service_name = 'logging-service'
+        _choice = choice(['logging1', 'logging2', 'logging3'])
     elif service == "message":
-        _choice = choice(['message-service1', 'message-service2'])
+        service_name = 'message-service'
+        _choice = choice(['message1', 'message2'])
     else:
         raise "invalid service. Use 'logging' or 'message'."
-    host, port = cf.get_service_params(service_name=_choice)
+    host, port = cf.get_service_params(service_name=service_name, service_id=_choice)
     resp = requests.get(f"http://{host}:{port}/{service}")
     if resp.status_code == 200:
         return resp.content.decode("utf-8"), _choice

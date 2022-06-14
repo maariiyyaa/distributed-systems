@@ -41,6 +41,6 @@ if __name__ == '__main__':
     ports = cf.get_kv("ports")
     client = HazelcastClient()
     db = client.get_map(cf.get_kv("hz_map")["name"])
-    cf.register_service(name="logging-service2", host="localhost", port=ports['logging2'])
+    cf.register_service(name="logging-service", host="localhost", port=ports['logging2'], service_id="logging2")
     app.run(host="localhost", port=ports['logging2'])
     client.shutdown()
