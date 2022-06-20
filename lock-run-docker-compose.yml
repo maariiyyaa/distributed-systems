@@ -6,4 +6,4 @@ services:
     deploy:
       replicas: 3
     volumes:
-      - ./opt_locks:/app
+      - ./<opt_>locks:/app
