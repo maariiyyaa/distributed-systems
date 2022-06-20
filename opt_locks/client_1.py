@@ -1,44 +1,24 @@
 from hazelcast.client import HazelcastClient
 import time
 
-class Value:
-    def __init__(self,):
-        self.amount = 0
-
-    def __add__(self, value):
-        self.amount = self.amount + value
-        return self
-
-    def __eq__(self, other):
-        if isinstance(other, self):
-            if self.amount == other.amount:
-                return True
-            else:
-                return False
-        else:
-            return False
-
-
-
-key = "my_key"
-value = Value()
-
-# Connect to Hazelcast cluster.
 client = HazelcastClient()
-distributed_map = client.get_map("distributed-map_masha")
+distributed_map = client.get_map("map_opt").blocking()
 
-distributed_map.put(key, value)
-print("String")
-for k in range(1, 20):
-    if k % 5 == 0:
-        print(f"At {k}")
+key = "1"
+distributed_map.put_if_absent(key, 0)
+
+print("Starting")
+
+for k in range(10):
     while True:
-        value = distributed_map.get(key).result()
-        time.sleep(1)
-        value_new = Value()
-        value_new.amount = value.amount + 1
-        if distributed_map.replace_if_same(key, value, value_new).result():
+        value = distributed_map.get(key)
+        value_new = value + 1
+        res = distributed_map.replace_if_same(key, value, value_new)
+        if res:
+            time.sleep(5)
             break
-print(f"Finished! Result = {value_new.amount}")
-# Shutdown the client.
+
+time.sleep(10)
+print("Finished! Result =", distributed_map.get(key))
+
 client.shutdown()
