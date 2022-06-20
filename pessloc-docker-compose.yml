@@ -1,0 +1,9 @@
+---
+version: '3'
+services:
+  loc_client:
+    build: .
+    deploy:
+      replicas: 3
+    volumes:
+      - ./opt_locks:/app
